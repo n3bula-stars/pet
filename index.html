@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chaos Demo</title>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#ff0000">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+      background: black;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: 0.1s;
+    }
+
+    h1 {
+      font-size: 3rem;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .floating {
+      position: absolute;
+      font-size: 2rem;
+      pointer-events: none;
+    }
+
+    video {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.3;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Click Anywhere To Start Chaos</h1>
+
+<script>
+let chaosStarted = false;
+
+document.body.addEventListener("click", () => {
+  if (chaosStarted) return;
+  chaosStarted = true;
+
+  document.querySelector("h1").textContent = "GOOD LUCK";
+
+  startColorChaos();
+  startFloatingText();
+  startShaking();
+  startAudioChaos();
+  startThemeColorChaos();
+});
+
+function startColorChaos() {
+  setInterval(() => {
+    document.body.style.background =
+      `hsl(${Math.random() * 360}, 100%, 50%)`;
+  }, 100);
+}
+
+function startFloatingText() {
+  const phrases = [
+    "CHAOS",
+    "ERROR",
+    "SYSTEM OVERLOAD",
+    "???",
+    "HELLO",
+    "GLITCH"
+  ];
+
+  setInterval(() => {
+    const div = document.createElement("div");
+    div.className = "floating";
+    div.textContent =
+      phrases[Math.floor(Math.random() * phrases.length)];
+
+    div.style.left = Math.random() * window.innerWidth + "px";
+    div.style.top = Math.random() * window.innerHeight + "px";
+    div.style.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+
+    document.body.appendChild(div);
+
+    setTimeout(() => div.remove(), 2000);
+  }, 150);
+}
+
+function startShaking() {
+  setInterval(() => {
+    document.body.style.transform =
+      `translate(${Math.random()*20-10}px,
+                 ${Math.random()*20-10}px)
+       rotate(${Math.random()*4-2}deg)`;
+  }, 50);
+}
+
+function startAudioChaos() {
+  const audioCtx = new (window.AudioContext ||
+                        window.webkitAudioContext)();
+  const oscillator = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  oscillator.type = "square";
+  oscillator.frequency.value = 200;
+
+  oscillator.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  gain.gain.value = 0.05;
+  oscillator.start();
+
+  setInterval(() => {
+    oscillator.frequency.value =
+      100 + Math.random() * 1000;
+  }, 200);
+}
+
+function startThemeColorChaos() {
+  const meta = document.querySelector(
+    'meta[name="theme-color"]'
+  );
+
+  setInterval(() => {
+    meta.setAttribute(
+      "content",
+      `#${Math.floor(Math.random()*16777215)
+        .toString(16)}`
+    );
+  }, 100);
+}
+</script>
+
+</body>
+</html>
