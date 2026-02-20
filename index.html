@@ -1,57 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Chaos Demo</title>
-  <meta charset="UTF-8">
-  <meta name="theme-color" content="#ff0000">
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: sans-serif;
-      background: black;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      transition: 0.1s;
-    }
-
-    h1 {
-      font-size: 3rem;
-      text-align: center;
-      z-index: 2;
-    }
-
-    .floating {
-      position: absolute;
-      font-size: 2rem;
-      pointer-events: none;
-    }
-
-    video {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.3;
-      z-index: 0;
-    }
-  </style>
-</head>
-<body>
-
-<h1>Click Anywhere To Start Chaos</h1>
-
 <script>
 let chaosStarted = false;
+let intervals = [];
+let oscillator = null;
+let audioCtx = null;
 
 document.body.addEventListener("click", () => {
   if (chaosStarted) return;
   chaosStarted = true;
 
-  document.querySelector("h1").textContent = "GOOD LUCK";
+  document.querySelector("h1").textContent =
+    "CHAOS ACTIVE (Press ESC to stop)";
 
   startColorChaos();
   startFloatingText();
@@ -60,24 +18,40 @@ document.body.addEventListener("click", () => {
   startThemeColorChaos();
 });
 
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") stopChaos();
+});
+
+function addInterval(fn, time) {
+  const id = setInterval(fn, time);
+  intervals.push(id);
+}
+
+function stopChaos() {
+  intervals.forEach(clearInterval);
+  intervals = [];
+
+  if (oscillator) oscillator.stop();
+  if (audioCtx) audioCtx.close();
+
+  document.body.style.background = "black";
+  document.body.style.transform = "none";
+  document.querySelector("h1").textContent =
+    "Chaos Stopped (Click to restart)";
+  chaosStarted = false;
+}
+
 function startColorChaos() {
-  setInterval(() => {
+  addInterval(() => {
     document.body.style.background =
       `hsl(${Math.random() * 360}, 100%, 50%)`;
   }, 100);
 }
 
 function startFloatingText() {
-  const phrases = [
-    "CHAOS",
-    "ERROR",
-    "SYSTEM OVERLOAD",
-    "???",
-    "HELLO",
-    "GLITCH"
-  ];
+  const phrases = ["CHAOS", "ERROR", "SYSTEM OVERLOAD"];
 
-  setInterval(() => {
+  addInterval(() => {
     const div = document.createElement("div");
     div.className = "floating";
     div.textContent =
@@ -85,16 +59,16 @@ function startFloatingText() {
 
     div.style.left = Math.random() * window.innerWidth + "px";
     div.style.top = Math.random() * window.innerHeight + "px";
-    div.style.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    div.style.color =
+      `hsl(${Math.random() * 360}, 100%, 50%)`;
 
     document.body.appendChild(div);
-
     setTimeout(() => div.remove(), 2000);
   }, 150);
 }
 
 function startShaking() {
-  setInterval(() => {
+  addInterval(() => {
     document.body.style.transform =
       `translate(${Math.random()*20-10}px,
                  ${Math.random()*20-10}px)
@@ -103,9 +77,10 @@ function startShaking() {
 }
 
 function startAudioChaos() {
-  const audioCtx = new (window.AudioContext ||
-                        window.webkitAudioContext)();
-  const oscillator = audioCtx.createOscillator();
+  audioCtx = new (window.AudioContext ||
+                  window.webkitAudioContext)();
+
+  oscillator = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
   oscillator.type = "square";
@@ -117,18 +92,17 @@ function startAudioChaos() {
   gain.gain.value = 0.05;
   oscillator.start();
 
-  setInterval(() => {
+  addInterval(() => {
     oscillator.frequency.value =
       100 + Math.random() * 1000;
   }, 200);
 }
 
 function startThemeColorChaos() {
-  const meta = document.querySelector(
-    'meta[name="theme-color"]'
-  );
+  const meta =
+    document.querySelector('meta[name="theme-color"]');
 
-  setInterval(() => {
+  addInterval(() => {
     meta.setAttribute(
       "content",
       `#${Math.floor(Math.random()*16777215)
@@ -137,6 +111,3 @@ function startThemeColorChaos() {
   }, 100);
 }
 </script>
-
-</body>
-</html>
